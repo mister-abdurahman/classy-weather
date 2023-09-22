@@ -32,13 +32,24 @@ function formatDay(dateStr: string) {
   }).format(new Date(dateStr));
 }
 
-class App_v1 extends React.Component {
+interface App_v1StateType {
+  location: string;
+  isLoading: boolean;
+  displayLocation: string;
+  weather: {
+    temperature_2m_max?: number[] | undefined;
+    temperature_2m_min?: number[] | undefined;
+    time?: any[] | undefined;
+    weathercode?: string | undefined;
+  };
+}
+class App_v1 extends React.Component<any, App_v1StateType> {
   // illustration of a class field for our state
   state = {
     location: "",
     isLoading: false,
     displayLocation: "",
-    weather: {},
+    weather: { weathercode: "" },
   };
 
   // we're using arrow fn cos of their relationship with the this keyword.
@@ -73,7 +84,7 @@ class App_v1 extends React.Component {
       const weatherData = await weatherRes.json();
       this.setState({ weather: weatherData.daily });
     } catch (err) {
-      console.err(err);
+      console.error(err);
     } finally {
       this.setState({ isLoading: false });
     }
@@ -86,7 +97,8 @@ class App_v1 extends React.Component {
     if (this.state.location.length > 2) this.fetchWeather();
   }
   // different but useEffect with dependencies
-  componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>): void {
+  // componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{}>): void {
+  componentDidUpdate(prevProps: Readonly<{}>, prevState: any): void {
     if (this.state.location !== prevState.location) this.fetchWeather();
 
     localStorage.setItem("location", this.state.location);
@@ -108,7 +120,7 @@ class App_v1 extends React.Component {
           {this.state.isLoading && "Loading"}
           {this.state.weather.weathercode && (
             <Weather
-              weather={this.state.weather}
+              weather={this.state?.weather}
               location={this.state.displayLocation}
             />
           )}
@@ -120,7 +132,11 @@ class App_v1 extends React.Component {
 
 export default App_v1;
 
-class Input extends React.Component {
+interface InputProps {
+  location: string;
+  onUpdate: Function;
+}
+class Input extends React.Component<InputProps, any> {
   render(): React.ReactNode {
     const { location, onUpdate } = this.props;
     return (
@@ -134,8 +150,17 @@ class Input extends React.Component {
     );
   }
 }
+interface weatherProps {
+  weather: {
+    temperature_2m_max?: number[] | undefined;
+    temperature_2m_min?: number[] | undefined;
+    time?: any[] | undefined;
+    weathercode?: string | undefined;
+  };
+  location: string;
+}
 
-class Weather extends React.Component {
+class Weather extends React.Component<weatherProps, any> {
   componentWillUnmount(): void {
     console.log("runs when component is unmounted");
   }
@@ -152,13 +177,13 @@ class Weather extends React.Component {
           Weather for {this.props.location}
         </h2>
         <ul className="md:flex md:flex-row grid grid-cols-2 justify-center items-center lg:gap-4 gap-2">
-          {dates.map((el: string, i: number) => (
+          {dates?.map((el: string, i: number) => (
             <Day
               key={el}
-              max={max[i]}
-              min={min[i]}
+              max={max && max[i]}
+              min={min && min[i]}
               date={el}
-              code={codes[i]}
+              code={codes && codes[i]}
               isToday={i === 0}
             />
           ))}
@@ -168,7 +193,7 @@ class Weather extends React.Component {
   }
 }
 
-class Day extends React.Component {
+class Day extends React.Component<any, any> {
   render(): React.ReactNode {
     const { max, min, date, code, isToday } = this.props;
     return (

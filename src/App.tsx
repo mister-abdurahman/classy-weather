@@ -1,6 +1,6 @@
 import React from "react";
 
-function getWeatherIcon(wmoCode) {
+function getWeatherIcon(wmoCode: number) {
   const icons = new Map([
     [[0], "☀️"],
     [[1], "🌤"],
@@ -22,7 +22,7 @@ function convertToFlag(countryCode: string) {
   const codePoints = countryCode
     .toUpperCase()
     .split("")
-    .map((char) => 127397 + char.charCodeAt());
+    .map((char) => 127397 + char.charCodeAt(1));
   return String.fromCodePoint(...codePoints);
 }
 
@@ -32,7 +32,7 @@ function formatDay(dateStr: string) {
   }).format(new Date(dateStr));
 }
 
-class App extends React.Component {
+class App extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
 
@@ -69,8 +69,8 @@ class App extends React.Component {
       );
       const weatherData = await weatherRes.json();
       this.setState({ weather: weatherData.daily });
-    } catch (err) {
-      console.err(err);
+    } catch (err: any) {
+      console.error(err);
     } finally {
       this.setState({ isLoading: false });
     }
@@ -111,7 +111,8 @@ class App extends React.Component {
 
 export default App;
 
-class Weather extends React.Component {
+class Weather extends React.Component<any, any> {
+  //first any is for props, second is state
   render(): React.ReactNode {
     const {
       temperature_2m_max: max,
@@ -141,7 +142,14 @@ class Weather extends React.Component {
   }
 }
 
-class Day extends React.Component {
+interface DayProps {
+  max: number;
+  min: number;
+  date: string;
+  code: number;
+  isToday: boolean;
+}
+class Day extends React.Component<DayProps, any> {
   render(): React.ReactNode {
     const { max, min, date, code, isToday } = this.props;
     return (
